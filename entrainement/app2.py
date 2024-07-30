@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.calibration import LabelEncoder
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -6,18 +7,17 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 
 nosDonneDHT = pd.read_csv("dht22_final.csv", sep=';', encoding='latin1')
-
-target = nosDonneDHT['Humidite']
-
-# Convertir les heures en secondes pour une meilleure manipulation
-nosDonneDHT['Heure'] = pd.to_timedelta(nosDonneDHT['Heure']).dt.total_seconds()
+X = nosDonneDHT[['Humidite']]
 
 # Re-diviser les caractéristiques et la cible après conversion
-features = nosDonneDHT[['Heure']]
+Y = nosDonneDHT['Target_hum']
+
+le_hum = LabelEncoder()
+Y = le_hum.fit_transform(Y)
 #print(features)
 
 # Diviser les données en ensembles d'entraînement et de test
-X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 # Construire et entraîner le modèle de régression linéaire
 algorithmeMRL = LinearRegression()
 algorithmeMRL.fit(X_train, y_train)

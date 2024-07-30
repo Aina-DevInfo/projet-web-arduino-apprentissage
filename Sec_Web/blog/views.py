@@ -58,18 +58,35 @@ class NewPred(View):
         modele_temp = load(fichier_temp)
         modele_hum = load(fichier_hum)
 
-        humidity = database.child('dht22').child('Humidity').get().val()
+        labels = ['froide', 'normale', 'chaude']
         temperature = database.child('dht22').child('Temperature').get().val()
-        temp = np.array([[temperature]])
-        hum = np.array([[humidity]])
-
+        temp = np.array([[temperature]], dtype=float)
+        temp = pd.DataFrame(temp, columns=['Temperature'])
         temperature_predite = modele_temp.predict(temp)
-        print(type(temperature_predite))
-        print(f"Température prédite : {temperature_predite[0]}")
+        if(temperature_predite[0] < 1):
+            prediction = 'Froid'
+        if(temperature_predite[0]>1 and temperature_predite[0]<=2):
+            prediction = 'Normal'
+        if(temperature_predite[0]>=1 and temperature_predite[0]<2):
+            prediction = 'chaude'
+        
+        print(f"Température prédite : {prediction}")
+        
+        
 
+        humidity = database.child('dht22').child('Humidity').get().val()
+        hum = np.array([[humidity]], dtype=float)
+        hum = pd.DataFrame(hum, columns=['Humidite'])
         humidite_predite = modele_hum.predict(hum)
+        if(humidite_predite[0] < 1.0):
+            prediction_H = 'Humide'
+            print("qsdfo")
+        if(humidite_predite[0]>1 ):
+            prediction_H = 'Sec'
+            print("qsdfo")
+        
         print(f"Humidité prédite : {humidite_predite[0]}")
-
+        
         #####
-        context = {'hum2': humidite_predite[0], 'temp2': temperature_predite[0] }
+        context = {'hum2': humidite_predite[0], 'temp2': prediction }
         return JsonResponse(context)
